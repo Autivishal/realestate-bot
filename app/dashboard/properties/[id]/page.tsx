@@ -17,7 +17,10 @@ import {
     Car,
     Wind,
     Maximize,
-    ArrowRight
+    ArrowRight,
+    X,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -36,14 +39,25 @@ export default function PropertyDetailPage() {
     const id = params?.id as string;
 
     const [property, setProperty] = useState<Property | null | undefined>(undefined);
-    const [activeImage, setActiveImage] = useState<string>("");
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
 
     useEffect(() => {
         if (!id) return;
         const prop = getPropertyById(id) || null;
         setProperty(prop);
-        if (prop) setActiveImage(prop.image);
     }, [id]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!lightboxOpen) return;
+            if (e.key === "Escape") setLightboxOpen(false);
+            if (e.key === "ArrowLeft") setCurrentIndex(prev => prev > 0 ? prev - 1 : gallery.length - 1);
+            if (e.key === "ArrowRight") setCurrentIndex(prev => prev < gallery.length - 1 ? prev + 1 : 0);
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    });
 
     if (property === undefined) {
         return (
@@ -76,7 +90,9 @@ export default function PropertyDetailPage() {
         property.image,
         "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
         "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80",
-        "https://images.unsplash.com/photo-1600566753086-00f18efc2291?w=800&q=80"
+        "https://images.unsplash.com/photo-1600566753086-00f18efc2291?w=800&q=80",
+        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80"
     ];
 
     const priceToDisplay = property.transactionType === "Sell" ? property.expectedPrice : property.monthlyRent;
@@ -107,8 +123,49 @@ export default function PropertyDetailPage() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
 
+
+
+                {/* ── Seamless Image Gallery ── */}
+                <div className="mb-10">
+                    <div
+                        className="relative h-[300px] sm:h-[450px] lg:h-[550px] w-full rounded-[2rem] overflow-hidden cursor-pointer group shadow-sm bg-muted"
+                        onClick={() => setLightboxOpen(true)}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={gallery[currentIndex]}
+                            alt={property.title}
+                            className="w-full h-full object-cover transition-opacity duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
+                        <div className="absolute bottom-5 left-5 bg-background/80 backdrop-blur-lg text-foreground px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 border border-border shadow-sm transform transition-all group-hover:scale-105">
+                            <Maximize className="h-4 w-4" /> View Fullscreen
+                        </div>
+                        <div className="absolute top-5 right-5 bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider">
+                            {currentIndex + 1} / {gallery.length} Images
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x pt-1 px-1">
+                        {gallery.map((img, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentIndex(i)}
+                                className={`relative h-20 w-28 sm:h-24 sm:w-36 rounded-2xl overflow-hidden flex-shrink-0 snap-center transition-all transform hover:scale-105 active:scale-95 ${currentIndex === i ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-70 hover:opacity-100'}`}
+                            >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={img}
+                                    alt={`Thumbnail ${i + 1}`}
+                                    className="w-full h-full object-cover"
+                                />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* ── Header Title Area ── */}
-                <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-8">
+                <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-10">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-md ${property.transactionType === 'Sell' ? 'bg-blue-500/15 text-blue-500' : 'bg-orange-500/15 text-orange-500'
@@ -135,44 +192,6 @@ export default function PropertyDetailPage() {
                             {formatPrice(priceToDisplay)}
                             {isRent && <span className="text-lg text-foreground/40 font-medium ml-1">/mo</span>}
                         </p>
-                    </div>
-                </div>
-
-                {/* ── Stunning Image Gallery ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 mb-10 h-[300px] sm:h-[450px] lg:h-[500px] rounded-3xl overflow-hidden group">
-                    {/* Main Hero Image */}
-                    <div className="lg:col-span-3 pb-2 lg:pb-0 h-full relative cursor-pointer overflow-hidden">
-                        <img
-                            src={activeImage}
-                            alt={property.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                        <button className="absolute bottom-4 left-4 bg-background/50 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-background/80 transition-colors">
-                            <Maximize className="h-4 w-4" /> View Fullscreen
-                        </button>
-                    </div>
-
-                    {/* Side Thumbnail Strip */}
-                    <div className="hidden lg:flex flex-col gap-2 h-full">
-                        {gallery.slice(1).map((img, i) => (
-                            <div
-                                key={i}
-                                className="flex-1 relative cursor-pointer overflow-hidden group/thumb"
-                                onClick={() => setActiveImage(img)}
-                            >
-                                <img
-                                    src={img}
-                                    alt="Thumbnail"
-                                    className={`w-full h-full object-cover transition-transform duration-500 group-hover/thumb:scale-110 ${activeImage === img ? 'brightness-100' : 'brightness-75'}`}
-                                />
-                                {i === 2 && (
-                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-sm tracking-wide">
-                                        +12 photos
-                                    </div>
-                                )}
-                            </div>
-                        ))}
                     </div>
                 </div>
 
@@ -318,6 +337,42 @@ export default function PropertyDetailPage() {
 
                 </div>
             </div>
+
+            {/* Lightbox */}
+            {lightboxOpen && (
+                <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center">
+                    <div className="absolute top-6 right-6 z-50 text-white flex gap-4 items-center">
+                        <span className="text-sm font-bold opacity-70 tracking-wider bg-white/10 px-3 py-1 rounded-full">{currentIndex + 1} / {gallery.length}</span>
+                        <button onClick={() => setLightboxOpen(false)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                            <X className="h-6 w-6" />
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setCurrentIndex(prev => prev > 0 ? prev - 1 : gallery.length - 1); }}
+                        className="absolute left-2 sm:left-10 p-3 sm:p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+                    >
+                        <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
+                    </button>
+
+                    <div className="w-full max-w-6xl h-full p-4 flex items-center justify-center" onClick={() => setLightboxOpen(false)}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={gallery[currentIndex]}
+                            alt={`${property.title} Fullscreen`}
+                            className="max-w-full max-h-[85vh] object-contain select-none"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </div>
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setCurrentIndex(prev => prev < gallery.length - 1 ? prev + 1 : 0); }}
+                        className="absolute right-2 sm:right-10 p-3 sm:p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+                    >
+                        <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
