@@ -16,6 +16,7 @@ import {
     X,
 } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV_ITEMS = [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -118,6 +119,12 @@ export function DashboardSidebar() {
                         <LogOut className="h-4 w-4" />
                         Log out
                     </Link>
+
+                    {/* Theme toggle */}
+                    <div className="flex items-center justify-between px-3 py-2">
+                        <span className="text-xs text-foreground/40 font-medium">Theme</span>
+                        <ThemeToggle />
+                    </div>
 
                     {/* User avatar */}
                     <div className="mt-3 flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border">
