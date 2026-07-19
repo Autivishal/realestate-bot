@@ -30,7 +30,7 @@ export default function PropertiesPage() {
     const router = useRouter();
     const [properties, setProperties] = useState<Property[]>([]);
     const [search, setSearch] = useState("");
-    const [filter, setFilter] = useState("All");
+    const [filter, setFilter] = useState("All Active");
 
     const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
     const [dialog, setDialog] = useState<{ type: "Sold" | "Rented" | "Hide" | "Republish" | "Delete", propertyId: string } | null>(null);
@@ -42,14 +42,25 @@ export default function PropertiesPage() {
         refresh();
     }, []);
 
-    const types = ["All", "Apartment", "Villa", "Bungalow", "Studio", "Commercial", "Penthouse", "Plot", "Land"];
+    const types = ["All Active", "Sold", "Rented", "Hidden", "Apartment / Flat", "Villa", "Office", "Commercial Plot"];
 
     const filtered = properties.filter((p) => {
         const matchSearch =
             p.title.toLowerCase().includes(search.toLowerCase()) ||
             p.locality.toLowerCase().includes(search.toLowerCase()) ||
             p.city.toLowerCase().includes(search.toLowerCase());
-        const matchFilter = filter === "All" || p.type === filter;
+
+        let matchFilter = false;
+
+        if (filter === "All Active") {
+            matchFilter = p.status === "Available";
+        } else if (["Sold", "Rented", "Hidden"].includes(filter)) {
+            matchFilter = p.status === filter;
+        } else {
+            // Type filters only show Available properties of that type
+            matchFilter = p.status === "Available" && p.type.includes(filter);
+        }
+
         return matchSearch && matchFilter;
     });
 
