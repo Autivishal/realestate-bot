@@ -127,15 +127,15 @@ export function DashboardSidebar() {
                     </div>
 
                     {/* User avatar */}
-                    <div className="mt-3 flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                    <Link href="/dashboard/profile" className="mt-3 flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border hover:bg-border/50 hover:border-border/80 transition-all cursor-pointer group">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-bold flex-shrink-0 group-hover:scale-105 transition-transform">
                             VA
                         </div>
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-semibold truncate">Vishal Auti</p>
+                        <div className="overflow-hidden flex-1">
+                            <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">Vishal Auti</p>
                             <p className="text-xs text-foreground/50 truncate">Pro Plan</p>
                         </div>
-                    </div>
+                    </Link>
                 </div>
             </aside>
         </>
