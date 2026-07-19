@@ -1,92 +1,109 @@
 "use client";
 
-import {
-    Users,
-    Search,
-    Phone,
-    MessageSquare,
-    Filter,
-    ChevronDown,
-    Star,
-} from "lucide-react";
 import { useState } from "react";
+import { Search, Filter, Phone, MessageSquare, Calendar, MapPin, Building2, ExternalLink, Clock, MoreVertical, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
-const LEADS = [
-    { id: 1, name: "Aarav Shah", phone: "+91 98234 56789", query: "3 BHK in Baner under ₹1Cr", status: "New", score: 92, time: "2m ago" },
-    { id: 2, name: "Priya Desai", phone: "+91 91234 56780", query: "2 BHK flat near Viman Nagar", status: "Qualified", score: 87, time: "18m ago" },
-    { id: 3, name: "Rohan Mehta", phone: "+91 98765 43210", query: "Luxury villa in Koregaon Park", status: "Viewing", score: 95, time: "1h ago" },
-    { id: 4, name: "Sneha Patil", phone: "+91 88234 12345", query: "Office space 1000-1500 sqft", status: "New", score: 75, time: "3h ago" },
-    { id: 5, name: "Karan Joshi", phone: "+91 77654 32100", query: "2 BHK near Hinjewadi IT park", status: "Qualified", score: 81, time: "5h ago" },
-    { id: 6, name: "Meera Kulkarni", phone: "+91 99544 66778", query: "Plot in NIBM area", status: "Cold", score: 45, time: "1d ago" },
-    { id: 7, name: "Suresh Iyer", phone: "+91 80123 45678", query: "1 BHK under ₹40L", status: "Closed", score: 70, time: "2d ago" },
-    { id: 8, name: "Ananya Singh", phone: "+91 98001 23456", query: "Row house in Aundh", status: "New", score: 88, time: "3d ago" },
+interface Lead {
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    requestedLocality: string;
+    budget: string;
+    otherReqs: string;
+    interestedPropertyId: string;
+    interestedPropertyTitle: string;
+    appointmentDate: string;
+    status: "Upcoming Visit" | "Visited" | "Negotiating" | "Closed";
+    leadScore: "High" | "Medium" | "Low";
+}
+
+const MOCK_LEADS: Lead[] = [
+    {
+        id: "L1",
+        customerName: "Rahul Sharma",
+        customerPhone: "+91 98765 43210",
+        requestedLocality: "Baner",
+        budget: "₹80L - ₹90L",
+        otherReqs: "3 BHK, Semi-Furnished, High Floor",
+        interestedPropertyId: "1",
+        interestedPropertyTitle: "Luxury 3 BHK Apartment",
+        appointmentDate: "Today, 4:00 PM",
+        status: "Upcoming Visit",
+        leadScore: "High"
+    },
+    {
+        id: "L2",
+        customerName: "Priya Desai",
+        customerPhone: "+91 91234 56789",
+        requestedLocality: "Hinjewadi",
+        budget: "Up to ₹40,000/mo (Rent)",
+        otherReqs: "2 BHK or Office, Fully Furnished",
+        interestedPropertyId: "2",
+        interestedPropertyTitle: "Premium Office Space",
+        appointmentDate: "Tomorrow, 11:30 AM",
+        status: "Upcoming Visit",
+        leadScore: "Medium"
+    },
+    {
+        id: "L3",
+        customerName: "Amit Patel",
+        customerPhone: "+91 90000 11111",
+        requestedLocality: "Wakad / Baner",
+        budget: "₹1.2 Cr - 1.5 Cr",
+        otherReqs: "Ready to move, 4 BHK Villa",
+        interestedPropertyId: "1",
+        interestedPropertyTitle: "Luxury 3 BHK Apartment", // Example fallback
+        appointmentDate: "July 18, 10:00 AM",
+        status: "Visited",
+        leadScore: "High"
+    }
 ];
 
-const statusColors: Record<string, string> = {
-    New: "bg-primary/10 text-primary",
-    Qualified: "bg-accent/10 text-accent",
-    Viewing: "bg-orange-500/10 text-orange-500",
-    Cold: "bg-foreground/10 text-foreground/60",
-    Closed: "bg-red-500/10 text-red-500",
-};
-
 export default function LeadsPage() {
+    const [leads] = useState<Lead[]>(MOCK_LEADS);
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState("All");
+    const [statusFilter, setStatusFilter] = useState("All");
 
-    const statuses = ["All", "New", "Qualified", "Viewing", "Cold", "Closed"];
+    const statuses = ["All", "Upcoming Visit", "Visited", "Negotiating", "Closed"];
 
-    const filtered = LEADS.filter((l) => {
-        const matchSearch =
-            l.name.toLowerCase().includes(search.toLowerCase()) ||
-            l.query.toLowerCase().includes(search.toLowerCase());
-        const matchStatus = status === "All" || l.status === status;
-        return matchSearch && matchStatus;
-    });
+    const filtered = leads.filter(l =>
+        (l.customerName.toLowerCase().includes(search.toLowerCase()) || l.customerPhone.includes(search)) &&
+        (statusFilter === "All" || l.status === statusFilter)
+    );
 
     return (
-        <div className="p-6 lg:p-8 space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Leads</h1>
-                <p className="text-foreground/60 text-sm mt-1">Track and manage your property leads</p>
+        <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Confirmed Leads</h1>
+                    <p className="text-foreground/60 text-sm mt-1 max-w-lg">
+                        Clients who have interacted with your WhatsApp AI and scheduled a property visit.
+                    </p>
+                </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                    { label: "Total Leads", value: "142", color: "text-foreground" },
-                    { label: "New Today", value: "18", color: "text-primary" },
-                    { label: "Qualified", value: "57", color: "text-accent" },
-                    { label: "Avg. Score", value: "78", color: "text-orange-500" },
-                ].map((s) => (
-                    <div key={s.label} className="bg-card border border-border rounded-xl p-4">
-                        <p className="text-xs text-foreground/50">{s.label}</p>
-                        <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
-                    </div>
-                ))}
-            </div>
-
-            {/* Search + Filter */}
+            {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
+                <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
                     <input
-                        id="lead-search"
                         type="text"
-                        placeholder="Search leads..."
+                        placeholder="Search name or phone..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                     />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
                     <Filter className="h-4 w-4 text-foreground/40 flex-shrink-0" />
                     {statuses.map((s) => (
                         <button
                             key={s}
-                            onClick={() => setStatus(s)}
-                            className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${status === s
-                                    ? "bg-primary text-primary-foreground"
+                            onClick={() => setStatusFilter(s)}
+                            className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${statusFilter === s
+                                    ? "bg-primary text-primary-foreground shadow-sm"
                                     : "bg-card border border-border text-foreground/70 hover:border-primary/50"
                                 }`}
                         >
@@ -96,68 +113,107 @@ export default function LeadsPage() {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="border-b border-border bg-border/30">
-                            <th className="text-left px-5 py-3 font-medium text-foreground/60 flex items-center gap-1">
-                                Name <ChevronDown className="h-3 w-3" />
-                            </th>
-                            <th className="text-left px-5 py-3 font-medium text-foreground/60 hidden md:table-cell">Phone</th>
-                            <th className="text-left px-5 py-3 font-medium text-foreground/60 hidden lg:table-cell">Query</th>
-                            <th className="text-left px-5 py-3 font-medium text-foreground/60">Status</th>
-                            <th className="text-left px-5 py-3 font-medium text-foreground/60 hidden sm:table-cell">Score</th>
-                            <th className="text-left px-5 py-3 font-medium text-foreground/60">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                        {filtered.map((lead) => (
-                            <tr key={lead.id} className="hover:bg-border/20 transition-colors">
-                                <td className="px-5 py-3.5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
-                                            {lead.name[0]}
-                                        </div>
-                                        <div>
-                                            <p className="font-medium">{lead.name}</p>
-                                            <p className="text-xs text-foreground/40">{lead.time}</p>
+            {/* List */}
+            <div className="space-y-4">
+                {filtered.map(lead => (
+                    <div key={lead.id} className="bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/30 transition-all">
+                        <div className="flex flex-col lg:flex-row gap-6">
+
+                            {/* Left: User Info */}
+                            <div className="flex-shrink-0 lg:w-1/4">
+                                <div className="flex items-start gap-4">
+                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                        {lead.customerName[0]}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg">{lead.customerName}</h3>
+                                        <p className="text-foreground/60 text-sm flex items-center gap-1.5 mt-0.5">
+                                            <Phone className="h-3 w-3" /> {lead.customerPhone}
+                                        </p>
+                                        <div className="mt-3 flex gap-2">
+                                            <button className="h-8 w-8 rounded-full bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white transition-colors flex items-center justify-center pointer" title="WhatsApp Message">
+                                                <MessageSquare className="h-4 w-4" />
+                                            </button>
+                                            <button className="h-8 w-8 rounded-full bg-blue-500/10 text-blue-600 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center" title="Call">
+                                                <Phone className="h-4 w-4" />
+                                            </button>
                                         </div>
                                     </div>
-                                </td>
-                                <td className="px-5 py-3.5 text-foreground/70 hidden md:table-cell">{lead.phone}</td>
-                                <td className="px-5 py-3.5 text-foreground/70 hidden lg:table-cell max-w-xs truncate">{lead.query}</td>
-                                <td className="px-5 py-3.5">
-                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[lead.status]}`}>
-                                        {lead.status}
-                                    </span>
-                                </td>
-                                <td className="px-5 py-3.5 hidden sm:table-cell">
-                                    <div className="flex items-center gap-1.5">
-                                        <Star className={`h-3.5 w-3.5 ${lead.score >= 80 ? "text-accent fill-accent" : "text-foreground/30"}`} />
-                                        <span className={`font-semibold ${lead.score >= 80 ? "text-accent" : "text-foreground/60"}`}>
-                                            {lead.score}
+                                </div>
+                            </div>
+
+                            <div className="hidden lg:block w-px bg-border my-2" />
+
+                            {/* Middle: AI Context & Requirements */}
+                            <div className="flex-1 space-y-3">
+                                <div>
+                                    <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1 flex items-center gap-1">
+                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                        AI Extracted Requirements
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="bg-background border border-border px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 text-foreground/80">
+                                            <MapPin className="h-3 w-3 text-foreground/40" /> {lead.requestedLocality}
+                                        </span>
+                                        <span className="bg-background border border-border px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 text-foreground/80">
+                                            <Building2 className="h-3 w-3 text-foreground/40" /> {lead.budget}
                                         </span>
                                     </div>
-                                </td>
-                                <td className="px-5 py-3.5">
+                                </div>
+                                <p className="text-sm text-foreground/70 bg-muted/50 p-2.5 rounded-lg border border-border/50">
+                                    "{lead.otherReqs}"
+                                </p>
+                            </div>
+
+                            <div className="hidden lg:block w-px bg-border my-2" />
+
+                            {/* Right: Property & Action */}
+                            <div className="flex-shrink-0 lg:w-1/3 flex flex-col justify-between">
+                                <div>
+                                    <p className="text-xs font-bold text-foreground/50 uppercase tracking-wider mb-2">
+                                        Property Visiting
+                                    </p>
+                                    <Link href={`/dashboard/properties/${lead.interestedPropertyId}`} className="group flex items-start gap-3 bg-secondary/20 hover:bg-secondary/40 p-2.5 rounded-xl transition-colors border border-transparent hover:border-secondary/50">
+                                        <div className="h-10 w-10 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <Building2 className="h-5 w-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-1">{lead.interestedPropertyTitle}</p>
+                                            <span className="text-xs text-primary flex items-center gap-1 mt-0.5">
+                                                View Listing <ExternalLink className="h-3 w-3" />
+                                            </span>
+                                        </div>
+                                    </Link>
+                                </div>
+
+                                <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
                                     <div className="flex items-center gap-2">
-                                        <button className="h-7 w-7 rounded-lg bg-primary/10 hover:bg-primary hover:text-white text-primary flex items-center justify-center transition-colors">
-                                            <Phone className="h-3.5 w-3.5" />
-                                        </button>
-                                        <button className="h-7 w-7 rounded-lg bg-secondary/10 hover:bg-secondary hover:text-white text-secondary flex items-center justify-center transition-colors">
-                                            <MessageSquare className="h-3.5 w-3.5" />
-                                        </button>
+                                        <Clock className="h-4 w-4 text-orange-500" />
+                                        <div>
+                                            <p className="text-[10px] uppercase font-bold text-foreground/40 leading-tight">Appointment</p>
+                                            <p className="text-sm font-bold">{lead.appointmentDate}</p>
+                                        </div>
                                     </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    <div>
+                                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border shadow-sm ${lead.status === "Upcoming Visit" ? "bg-orange-500/10 text-orange-600 border-orange-500/20" :
+                                                lead.status === "Visited" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
+                                                    lead.status === "Negotiating" ? "bg-purple-500/10 text-purple-600 border-purple-500/20" :
+                                                        "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                            }`}>
+                                            {lead.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
                 {filtered.length === 0 && (
-                    <div className="flex flex-col items-center py-16 text-foreground/40">
-                        <Users className="h-10 w-10 mb-2 opacity-30" />
-                        <p className="font-medium">No leads found</p>
+                    <div className="flex flex-col items-center justify-center py-20 text-foreground/40 bg-card rounded-3xl border border-dashed border-border">
+                        <Calendar className="h-12 w-12 mb-3 opacity-30" />
+                        <p className="font-medium">No confirmed visits yet</p>
+                        <p className="text-sm">Wait for your AI bot to schedule appointments.</p>
                     </div>
                 )}
             </div>
