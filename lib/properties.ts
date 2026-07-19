@@ -157,3 +157,17 @@ export const getPropertyById = (id: string): Property | undefined => {
     const all = getProperties();
     return all.find(p => p.id === id);
 };
+
+export const updatePropertyStatus = (id: string, status: string): void => {
+    if (typeof window === "undefined") return;
+    const all = getProperties();
+    const updated = all.map(p => p.id === id ? { ...p, status } : p);
+    localStorage.setItem("propbot_properties", JSON.stringify(updated));
+};
+
+export const deleteProperty = (id: string): void => {
+    if (typeof window === "undefined") return;
+    const all = getProperties();
+    const filtered = all.filter(p => p.id !== id);
+    localStorage.setItem("propbot_properties", JSON.stringify(filtered));
+};
