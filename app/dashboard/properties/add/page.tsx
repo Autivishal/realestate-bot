@@ -127,7 +127,17 @@ export default function AddPropertyPage() {
             baths: Number(form.baths) || 0,
             area: Number(form.builtUpArea) || Number(form.plotArea) || 0,
             furnishing: form.furnishing,
-            amenities: [...form.amenities, ...(form.otherAmenities ? form.otherAmenities.split(",").map(s => s.trim()) : [])],
+            parking: Boolean(form.parking),
+            propertyAge: form.propertyAge,
+            readyToMove: form.readyToMove,
+            floorNumber: form.floorNumber,
+            totalFloors: form.totalFloors,
+            garden: form.garden,
+            washrooms: Number(form.washrooms) || 0,
+            plotWidth: Number(form.plotWidth) || 0,
+            plotLength: Number(form.plotLength) || 0,
+            cornerPlot: form.cornerPlot,
+            amenities: [...form.amenities, ...(form.otherAmenities ? form.otherAmenities.split(",").map(s => s.trim()) : [])].filter(Boolean),
         });
 
         setTimeout(() => {

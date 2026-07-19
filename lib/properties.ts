@@ -56,7 +56,7 @@ const DEFAULT_PROPERTIES: Property[] = [
     {
         id: "1",
         title: "Luxury 3 BHK Apartment",
-        description: "A well-designed 3 BHK apartment in the prime Baner locality with excellent ventilation.",
+        description: "A well-designed 3 BHK apartment in the prime Baner locality with excellent ventilation and panoramic views of the city skyline. Features a modular kitchen, imported marble flooring, and smart home automation features. Perfect for families looking for a premium lifestyle.",
         transactionType: "Sell",
         expectedPrice: 8500000,
         negotiable: true,
@@ -70,50 +70,72 @@ const DEFAULT_PROPERTIES: Property[] = [
         builtUpArea: 1450,
         furnishing: "Semi-Furnished",
         parking: true,
-        status: "Published",
+        status: "Available",
         beds: 3,
         baths: 2,
-        propertyAge: "New",
+        propertyAge: "0-1 Years",
         readyToMove: true,
         floorNumber: "5",
         totalFloors: "12",
-        amenities: ["Swimming Pool", "Gym", "Security", "Parking"],
+        amenities: ["Swimming Pool", "Gym", "Security", "Parking", "Club House"],
     },
     {
         id: "2",
-        title: "Modern 2 BHK Flat",
-        description: "Affordable and modern 2 BHK flat in Hinjewadi, perfect for IT professionals.",
+        title: "Premium Office Space",
+        description: "Spacious, fully air-conditioned office space located in the heart of Hinjewadi IT Park. Open floor plan, meeting rooms, and a dedicated cafeteria area. Excellent connectivity and surrounding ecosystem for tech startups and enterprises alike.",
         transactionType: "Rent",
-        monthlyRent: 35000,
-        securityDeposit: 100000,
+        monthlyRent: 85000,
+        securityDeposit: 500000,
         availableFrom: "2026-08-01",
-        category: "Residential",
-        type: "Apartment / Flat",
+        category: "Commercial",
+        type: "Office",
         city: "Pune",
         locality: "Hinjewadi",
-        fullAddress: "Phase 1, Hinjewadi IT Park, Pune",
-        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=900&auto=format&fit=crop&q=80",
+        fullAddress: "Tower A, Phase 1, Hinjewadi IT Park, Pune",
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=900&auto=format&fit=crop&q=80",
         images: [],
-        builtUpArea: 960,
-        furnishing: "Unfurnished",
+        builtUpArea: 2400,
+        furnishing: "Fully Furnished",
         parking: true,
-        status: "Published",
-        beds: 2,
-        baths: 2,
-        readyToMove: true,
-        floorNumber: "3",
-        totalFloors: "8",
-        amenities: ["Gym", "Security", "Parking"],
+        status: "Available",
+        washrooms: 2,
+        floorNumber: "4",
+        totalFloors: "10",
+        amenities: ["Central AC", "Security", "Parking", "Power Backup", "Cafeteria"],
+    },
+    {
+        id: "3",
+        title: "Prime Commercial Plot",
+        description: "A rectangular, well-leveled corner plot located on a busy intersection. Ideal for building a retail showroom, commercial complex, or a hospitality venture. Water and electricity connections are already sanctioned.",
+        transactionType: "Sell",
+        expectedPrice: 45000000,
+        negotiable: false,
+        category: "Land",
+        type: "Commercial Plot",
+        city: "Pune",
+        locality: "Wakad",
+        fullAddress: "Main Road intersection, Wakad, Pune",
+        image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=900&auto=format&fit=crop&q=80",
+        images: [],
+        plotArea: 5000,
+        plotWidth: 50,
+        plotLength: 100,
+        cornerPlot: true,
+        status: "Available",
+        amenities: ["Water Connection", "Electricity", "Road Access"],
     }
 ];
 
 export const getProperties = (): Property[] => {
     if (typeof window === "undefined") return DEFAULT_PROPERTIES;
     const stored = localStorage.getItem("propbot_properties");
-    if (!stored) {
+
+    // Automatically reset if old cache doesn't have the new category fields
+    if (!stored || !stored.includes("Commercial Plot")) {
         localStorage.setItem("propbot_properties", JSON.stringify(DEFAULT_PROPERTIES));
         return DEFAULT_PROPERTIES;
     }
+
     try {
         return JSON.parse(stored);
     } catch (e) {

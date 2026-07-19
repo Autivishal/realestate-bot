@@ -5,7 +5,8 @@ import { Building2, Plus, Search, SlidersHorizontal, MapPin, Bed, Bath, IndianRu
 import { useState, useEffect } from "react";
 import { getProperties, Property } from "@/lib/properties";
 
-const formatPrice = (p: number, t: string) => {
+const formatPrice = (p: number | undefined, t: string) => {
+    if (!p) return "Price on Request";
     let base = "";
     if (p >= 10000000) base = `₹${(p / 10000000).toFixed(2)} Cr`;
     else if (p >= 100000) base = `₹${(p / 100000).toFixed(2)} L`;
@@ -28,7 +29,8 @@ export default function PropertiesPage() {
     const filtered = properties.filter((p) => {
         const matchSearch =
             p.title.toLowerCase().includes(search.toLowerCase()) ||
-            p.location.toLowerCase().includes(search.toLowerCase());
+            p.locality.toLowerCase().includes(search.toLowerCase()) ||
+            p.city.toLowerCase().includes(search.toLowerCase());
         const matchFilter = filter === "All" || p.type === filter;
         return matchSearch && matchFilter;
     });
@@ -125,29 +127,29 @@ export default function PropertiesPage() {
                                 {property.title}
                             </h3>
                             <p className="text-xs text-foreground/60 flex items-center gap-1 mt-1">
-                                <MapPin className="h-3 w-3" /> {property.location}
+                                <MapPin className="h-3 w-3" /> {property.locality}, {property.city}
                             </p>
 
                             <div className="flex items-center gap-3 mt-3 text-xs text-foreground/60">
-                                {property.beds > 0 && (
+                                {property.beds ? (
                                     <span className="flex items-center gap-1">
                                         <Bed className="h-3.5 w-3.5" /> {property.beds}
                                     </span>
-                                )}
-                                {property.baths > 0 && (
+                                ) : null}
+                                {property.baths ? (
                                     <span className="flex items-center gap-1">
                                         <Bath className="h-3.5 w-3.5" /> {property.baths}
                                     </span>
-                                )}
-                                {property.area > 0 && (
-                                    <span>{property.area} sqft</span>
-                                )}
+                                ) : null}
+                                {(property.builtUpArea || property.plotArea) ? (
+                                    <span>{property.builtUpArea || property.plotArea} sqft</span>
+                                ) : null}
                             </div>
 
                             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
                                 <span className="font-bold text-primary flex items-center gap-0.5">
                                     <IndianRupee className="h-3.5 w-3.5 -mr-1" />
-                                    {formatPrice(property.price, property.transactionType).replace("₹", "")}
+                                    {formatPrice(property.transactionType === "Sell" ? property.expectedPrice : property.monthlyRent, property.transactionType).replace("₹", "")}
                                 </span>
                                 <span className="text-xs text-foreground/50 bg-border/60 px-2 py-1 rounded-lg">
                                     View Details →
