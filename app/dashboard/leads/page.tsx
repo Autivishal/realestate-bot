@@ -12,9 +12,9 @@ interface Lead {
     budget: string;
     otherReqs: string;
     interestedPropertyId: string;
-    interestedPropertyTitle: string;
-    appointmentDate: string;
-    status: "Upcoming Visit" | "Visited" | "Negotiating" | "Closed";
+    interestedPropertyTitle: string | null;
+    appointmentDate: string | null;
+    status: "Upcoming Visit" | "Visited" | "Negotiating" | "Browsing (No Visit)" | "Closed";
     leadScore: "High" | "Medium" | "Low";
 }
 
@@ -47,6 +47,19 @@ const MOCK_LEADS: Lead[] = [
     },
     {
         id: "L3",
+        customerName: "Sneha Patil",
+        customerPhone: "+91 95555 44444",
+        requestedLocality: "Kothrud",
+        budget: "₹60L",
+        otherReqs: "1 BHK, Near Metro Station",
+        interestedPropertyId: "",
+        interestedPropertyTitle: null,
+        appointmentDate: null,
+        status: "Browsing (No Visit)",
+        leadScore: "Low"
+    },
+    {
+        id: "L4",
         customerName: "Amit Patel",
         customerPhone: "+91 90000 11111",
         requestedLocality: "Wakad / Baner",
@@ -65,7 +78,7 @@ export default function LeadsPage() {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
 
-    const statuses = ["All", "Upcoming Visit", "Visited", "Negotiating", "Closed"];
+    const statuses = ["All", "Upcoming Visit", "Browsing (No Visit)", "Visited", "Negotiating", "Closed"];
 
     const filtered = leads.filter(l =>
         (l.customerName.toLowerCase().includes(search.toLowerCase()) || l.customerPhone.includes(search)) &&
@@ -77,9 +90,9 @@ export default function LeadsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Confirmed Leads</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Active Leads</h1>
                     <p className="text-foreground/60 text-sm mt-1 max-w-lg">
-                        Clients who have interacted with your WhatsApp AI and scheduled a property visit.
+                        Clients interacting with your WhatsApp AI. Monitor ongoing chats and confirmed property visits.
                     </p>
                 </div>
             </div>
@@ -103,8 +116,8 @@ export default function LeadsPage() {
                             key={s}
                             onClick={() => setStatusFilter(s)}
                             className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${statusFilter === s
-                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                    : "bg-card border border-border text-foreground/70 hover:border-primary/50"
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "bg-card border border-border text-foreground/70 hover:border-primary/50"
                                 }`}
                         >
                             {s}
@@ -171,34 +184,59 @@ export default function LeadsPage() {
                             <div className="flex-shrink-0 lg:w-1/3 flex flex-col justify-between">
                                 <div>
                                     <p className="text-xs font-bold text-foreground/50 uppercase tracking-wider mb-2">
-                                        Property Visiting
+                                        Property Context
                                     </p>
-                                    <Link href={`/dashboard/properties/${lead.interestedPropertyId}`} className="group flex items-start gap-3 bg-secondary/20 hover:bg-secondary/40 p-2.5 rounded-xl transition-colors border border-transparent hover:border-secondary/50">
-                                        <div className="h-10 w-10 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Building2 className="h-5 w-5 text-primary" />
+                                    {lead.interestedPropertyId && lead.interestedPropertyTitle ? (
+                                        <Link href={`/dashboard/properties/${lead.interestedPropertyId}`} className="group flex items-start gap-3 bg-secondary/20 hover:bg-secondary/40 p-2.5 rounded-xl transition-colors border border-transparent hover:border-secondary/50 truncate">
+                                            <div className="h-10 w-10 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <Building2 className="h-5 w-5 text-primary" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-bold group-hover:text-primary transition-colors truncate">{lead.interestedPropertyTitle}</p>
+                                                <span className="text-xs text-primary flex items-center gap-1 mt-0.5">
+                                                    View Listing <ExternalLink className="h-3 w-3" />
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ) : (
+                                        <div className="flex items-center gap-3 bg-muted/50 p-2.5 rounded-xl border border-dashed border-border/60">
+                                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <Search className="h-5 w-5 text-foreground/40" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-foreground/70">Still searching...</p>
+                                                <span className="text-[11px] text-foreground/50">Bot is recommending listings</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-1">{lead.interestedPropertyTitle}</p>
-                                            <span className="text-xs text-primary flex items-center gap-1 mt-0.5">
-                                                View Listing <ExternalLink className="h-3 w-3" />
-                                            </span>
-                                        </div>
-                                    </Link>
+                                    )}
                                 </div>
 
                                 <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
                                     <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-orange-500" />
-                                        <div>
-                                            <p className="text-[10px] uppercase font-bold text-foreground/40 leading-tight">Appointment</p>
-                                            <p className="text-sm font-bold">{lead.appointmentDate}</p>
-                                        </div>
+                                        {lead.appointmentDate ? (
+                                            <>
+                                                <Clock className="h-4 w-4 text-orange-500" />
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold text-foreground/40 leading-tight">Appointment</p>
+                                                    <p className="text-sm font-bold">{lead.appointmentDate}</p>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <MessageSquare className="h-4 w-4 text-primary/50" />
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold text-foreground/40 leading-tight">Chat Status</p>
+                                                    <p className="text-sm font-semibold text-foreground/60 italic">Chat in progress...</p>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                     <div>
                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border shadow-sm ${lead.status === "Upcoming Visit" ? "bg-orange-500/10 text-orange-600 border-orange-500/20" :
                                                 lead.status === "Visited" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
                                                     lead.status === "Negotiating" ? "bg-purple-500/10 text-purple-600 border-purple-500/20" :
-                                                        "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                                        lead.status === "Browsing (No Visit)" ? "bg-foreground/10 text-foreground/60 border-border" :
+                                                            "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                             }`}>
                                             {lead.status}
                                         </span>
