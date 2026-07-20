@@ -122,7 +122,8 @@ export default function AddPropertyPage() {
             // Attributes mapping
             beds: Number(form.beds) || 0,
             baths: Number(form.baths) || 0,
-            area: Number(form.builtUpArea) || Number(form.plotArea) || 0,
+            builtUpArea: Number(form.builtUpArea) || undefined,
+            plotArea: Number(form.plotArea) || undefined,
             furnishing: form.furnishing,
             parking: Boolean(form.parking),
             propertyAge: form.propertyAge,
