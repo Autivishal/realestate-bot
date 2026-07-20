@@ -101,8 +101,6 @@ export default function AddPropertyPage() {
     const handleSave = (status: "Draft" | "Published") => {
         setLoading(status);
 
-        const price = form.transactionType === "Sell" ? Number(form.expectedPrice) : 0;
-
         // Minimal mock save logic
         addProperty({
             title: form.title || `Beautiful ${form.type} for ${form.transactionType}`,
@@ -113,7 +111,6 @@ export default function AddPropertyPage() {
             city: form.city || "N/A",
             locality: form.locality || "N/A",
             fullAddress: form.fullAddress || "",
-            price: form.transactionType === "Sell" ? price : Number(form.monthlyRent),
             monthlyRent: Number(form.monthlyRent),
             expectedPrice: Number(form.expectedPrice),
             image: form.category === "Commercial"
